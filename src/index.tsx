@@ -20,6 +20,8 @@ function waitForTimeout(timeout: any) {
 }
 
 app.get('/scrape', async (req, res) => {
+    console.log('step 0')
+
     const browser = await puppeteer.launch({ 'headless': 'new' });
     const page = await browser.newPage();
 
@@ -28,11 +30,23 @@ app.get('/scrape', async (req, res) => {
 
     await page.type('textarea.gLFyf', textToType);
     await page.keyboard.press('Enter');
-    await waitForTimeout(3000);
-    await page.screenshot({ path: 'screenshot.png' });
+    await waitForTimeout(1000);
+    // await page.screenshot({ path: 'screenshot.png' });
+
+    // now scrape data
+    // Grab the search result titles and descriptions
+    console.log('step 1')
+    const selector = '.LC20lb.MBeuO.DKV0Md'
+    console.log('step 2')
+    const divElements = await page.$$eval(selector, divs => {
+        return divs.map(div => div.textContent)
+    })
+
+    console.log('step 3')
+    console.log({ divElements })
 
     await browser.close();
-    res.send('Express + TypeScript Server');
+    res.send({ text: 'text' });
 });
 
 app.listen(port, () => {
