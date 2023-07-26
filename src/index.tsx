@@ -20,7 +20,6 @@ function waitForTimeout(timeout: any) {
 }
 
 app.get('/scrape', async (req, res) => {
-    console.log('step 0')
 
     const browser = await puppeteer.launch({ 'headless': 'new' });
     const page = await browser.newPage();
@@ -31,19 +30,36 @@ app.get('/scrape', async (req, res) => {
     await page.type('textarea.gLFyf', textToType);
     await page.keyboard.press('Enter');
     await waitForTimeout(1000);
-    // await page.screenshot({ path: 'screenshot.png' });
+    const selector = '.vdQmEd.fP1Qef.EtOod.pkphOe .CCgQ5.vCa9Yd.QfkTvb.N8QANc.MUxGbd.v0nnCb';
+    await page.waitForSelector(selector);
 
-    // now scrape data
-    // Grab the search result titles and descriptions
-    console.log('step 1')
-    const selector = '.LC20lb.MBeuO.DKV0Md'
-    console.log('step 2')
-    const divElements = await page.$$eval(selector, divs => {
-        return divs.map(div => div.textContent)
-    })
+    // Function to get the text inside the span element
+    const getTitles = async () => {
+        const spanTexts = await page.$$eval(selector, divs => {
+            return divs.map((div) => {
+                const spanElement = div.querySelector('span');
+                return spanElement ? spanElement.textContent : null
+            })
+        });
+        return spanTexts;
+    };
+    // ---------------------
+    // Function to get the text inside the span element
+    const selector_2 = '.x2VHCd.OSrXXb.ob9lvb';
+    await page.waitForSelector(selector_2);
 
-    console.log('step 3')
-    console.log({ divElements })
+    const getSites = async () => {
+        return await page.$$eval(selector_2, spans => {
+            console.log({ count: spans.length })
+            return spans.map((span) => span.textContent)
+        });
+    };
+
+
+    let titles = await getTitles();
+    let sites = await getSites();
+
+    console.log({ titles, sites })
 
     await browser.close();
     res.send({ text: 'text' });
